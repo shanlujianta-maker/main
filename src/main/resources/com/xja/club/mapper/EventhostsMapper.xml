@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xja.club.mapper.EventhostsMapper">
+
+    <resultMap id="BaseResultMap" type="Eventhosts">
+            <id property="hostId" column="host_id" />
+            <result property="activityId" column="activity_id" />
+            <result property="clubId" column="club_id" />
+            <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        host_id,activity_id,club_id,created_at
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from eventhosts
+        where  host_id = #{hostId} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from eventhosts
+        where  host_id = #{hostId} 
+    </delete>
+    <insert id="insert" keyColumn="host_id" keyProperty="hostId" parameterType="Eventhosts" useGeneratedKeys="true">
+        insert into eventhosts
+        ( host_id,activity_id,club_id,created_at)
+        values (#{hostId},#{activityId},#{clubId},#{createdAt})
+    </insert>
+    <insert id="insertSelective" keyColumn="host_id" keyProperty="hostId" parameterType="Eventhosts" useGeneratedKeys="true">
+        insert into eventhosts
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="hostId != null">host_id,</if>
+                <if test="activityId != null">activity_id,</if>
+                <if test="clubId != null">club_id,</if>
+                <if test="createdAt != null">created_at,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="hostId != null">#{hostId},</if>
+                <if test="activityId != null">#{activityId},</if>
+                <if test="clubId != null">#{clubId},</if>
+                <if test="createdAt != null">#{createdAt},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="Eventhosts">
+        update eventhosts
+        <set>
+                <if test="activityId != null">
+                    activity_id = #{activityId},
+                </if>
+                <if test="clubId != null">
+                    club_id = #{clubId},
+                </if>
+                <if test="createdAt != null">
+                    created_at = #{createdAt},
+                </if>
+        </set>
+        where   host_id = #{hostId} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="Eventhosts">
+        update eventhosts
+        set 
+            activity_id =  #{activityId},
+            club_id =  #{clubId},
+            created_at =  #{createdAt}
+        where   host_id = #{hostId} 
+    </update>
+</mapper>

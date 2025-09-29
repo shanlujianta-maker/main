@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xja.club.mapper.ClubsMapper">
+
+    <resultMap id="BaseResultMap" type="Clubs">
+            <id property="clubId" column="club_id" jdbcType="INTEGER" />
+            <result property="clubName" column="club_name" jdbcType="VARCHAR" />
+            <result property="description" column="description" jdbcType="LONGVARCHAR" />
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP" />
+            <result property="clubStatus" column="club_status" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        club_id,
+    club_name,
+    description,
+    created_at,
+    club_status
+    </sql>
+
+
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT * FROM clubs WHERE club_id = #{clubId}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from clubs
+        where  club_id = #{clubId} 
+    </delete>
+
+    <insert id="insert" keyColumn="club_id" keyProperty="clubId" parameterType="Clubs" useGeneratedKeys="true">
+        insert into clubs
+        ( club_id,club_name,description,created_at,club_status)
+        values (#{clubId},#{clubName},#{description},#{createdAt},#{clubStatus})
+    </insert>
+
+    <insert id="insertSelective" keyColumn="club_id" keyProperty="clubId" parameterType="Clubs" useGeneratedKeys="true">
+        insert into clubs
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="clubId != null">club_id,</if>
+                <if test="clubName != null">club_name,</if>
+                <if test="description != null">description,</if>
+                <if test="createdAt != null">created_at,</if>
+                <if test="clubStatus != null">club_status,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="clubId != null">#{clubId},</if>
+                <if test="clubName != null">#{clubName},</if>
+                <if test="description != null">#{description},</if>
+                <if test="createdAt != null">#{createdAt},</if>
+                <if test="clubStatus != null">#{clubStatus},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="Clubs">
+        update clubs
+        <set>
+                <if test="clubName != null">
+                    club_name = #{clubName},
+                </if>
+                <if test="description != null">
+                    description = #{description},
+                </if>
+                <if test="createdAt != null">
+                    created_at = #{createdAt},
+                </if>
+                <if test="clubStatus != null">
+                    club_status = #{clubStatus},
+                </if>
+        </set>
+        where   club_id = #{clubId} 
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="Clubs">
+        update clubs
+        set 
+            club_name =  #{clubName},
+            description =  #{description},
+            created_at =  #{createdAt},
+            club_status =  #{clubStatus}
+        where   club_id = #{clubId} 
+    </update>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM clubs
+    </select>
+
+</mapper>

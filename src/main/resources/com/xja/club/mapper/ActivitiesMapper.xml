@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 命名空间需与Mapper接口全类名一致 -->
+<mapper namespace="com.xja.club.mapper.ActivitiesMapper">
+
+    <!-- 基础结果集映射（解决数据库字段与实体类属性映射） -->
+    <resultMap id="BaseResultMap" type="com.xja.club.pojo.Activities">
+        <!-- 为非字符串字段添加jdbcType -->
+        <id column="activity_id" property="activityId" jdbcType="INTEGER"/>
+        <result column="activity_name" property="activityName" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/> <!-- 对应datetime类型 -->
+        <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
+        <result column="location" property="location" jdbcType="VARCHAR"/>
+        <result column="organizing_club_id" property="organizingClubId" jdbcType="INTEGER"/>
+        <result column="max_participants" property="maxParticipants" jdbcType="INTEGER"/>
+        <result column="current_participants" property="currentParticipants" jdbcType="INTEGER"/>
+        <result column="act_status" property="actStatus" jdbcType="VARCHAR"/> <!-- 对应enum类型，按字符串处理 -->
+        <result column="created_by_user_id" property="createdByUserId" jdbcType="INTEGER"/>
+    </resultMap>
+    <!-- 实现listAll()方法：查询所有活动 -->
+    <select id="listAll" resultMap="BaseResultMap">
+        SELECT
+            activity_id,
+            activity_name,
+            description,
+            start_time,
+            end_time,
+            location,
+            organizing_club_id,
+            max_participants,
+            current_participants,
+            act_status,
+            created_by_user_id
+            -- 确保与数据库字段一致（参考dataSources XML中activities表结构）
+        FROM activities
+    </select>
+
+    <!-- 使用活动详情视图查询所有活动（包含关联信息） -->
+    <select id="selectAllWithDetails" resultType="java.util.Map">
+        SELECT * FROM v_activity_detail
+        ORDER BY start_time DESC
+    </select>
+
+    <!-- 使用活动预告视图查询活动预告 -->
+    <select id="selectActivityNotices" resultType="java.util.Map">
+        SELECT * FROM v_activity_notice
+        WHERE act_status IN ('planning', 'open')
+        ORDER BY start_time ASC
+    </select>
+
+    <!-- 使用活动报名统计视图查询统计信息 -->
+    <select id="selectRegistrationStats" resultType="java.util.Map">
+        SELECT * FROM v_activity_registration_stats
+        ORDER BY start_time DESC
+    </select>
+    <!-- 已有的CRUD方法（保持与接口对应） -->
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT * FROM activities WHERE activity_id = #{activityId}
+    </select>
+
+    <!-- 修改 club/src/main/resources/com/xja/club/mapper/ActivitiesMapper.xml 的 insertSelective -->
+    <insert id="insertSelective" parameterType="com.xja.club.pojo.Activities"
+            useGeneratedKeys="true" keyProperty="activityId"> <!-- 新增自增ID配置 -->
+        INSERT INTO activities
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <!-- 移除 NOT NULL 字段的 if 判断，确保即使前端未传也会插入（依赖数据库默认值） -->
+            activity_name,  <!-- 必传，无默认值，后端必须校验 -->
+            <if test="description != null">description,</if>
+            start_time,  <!-- 必传，无默认值，后端必须校验 -->
+            end_time,  <!-- 必传，无默认值，后端必须校验 -->
+            <if test="location != null">location,</if>
+            organizing_club_id,  <!-- 必传，无默认值，后端必须校验 -->
+            max_participants,  <!-- 有默认值0，即使未传也会用默认值 -->
+            current_participants,  <!-- 有默认值0，即使未传也会用默认值 -->
+            act_status,  <!-- 有默认值'planning'，即使未传也会用默认值 -->
+            created_by_user_id  <!-- 必传，无默认值，后端必须校验 -->
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{activityName},  <!-- 必传字段，无默认值 -->
+            <if test="description != null">#{description},</if>
+            #{startTime},  <!-- 必传字段，无默认值 -->
+            #{endTime},  <!-- 必传字段，无默认值 -->
+            <if test="location != null">#{location},</if>
+            #{organizingClubId},  <!-- 必传字段，无默认值 -->
+            #{maxParticipants,jdbcType=INTEGER},  <!-- 未传时数据库用默认值0 -->
+            #{currentParticipants,jdbcType=INTEGER},  <!-- 未传时数据库用默认值0 -->
+            #{actStatus,jdbcType=VARCHAR},  <!-- 未传时数据库用默认值'planning' -->
+            #{createdByUserId}  <!-- 必传字段，无默认值 -->
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.xja.club.pojo.Activities">
+        UPDATE activities
+        <set>
+            <if test="activityName != null">activity_name = #{activityName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="organizingClubId != null">organizing_club_id = #{organizingClubId},</if>
+            <if test="maxParticipants != null">max_participants = #{maxParticipants},</if>
+            <if test="currentParticipants != null">current_participants = #{currentParticipants},</if>
+            <if test="actStatus != null">act_status = #{actStatus},</if>
+            <if test="createdByUserId != null">created_by_user_id = #{createdByUserId},</if>
+        </set>
+        WHERE activity_id = #{activityId}
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        DELETE FROM activities
+        WHERE activity_id = #{activityId}
+    </delete>
+
+    <!-- 增加参与人数 -->
+    <update id="incrementParticipantCount" parameterType="java.lang.Integer">
+        UPDATE activities 
+        SET current_participants = current_participants + 1
+        WHERE activity_id = #{activityId}
+    </update>
+
+    <!-- 减少参与人数 -->
+    <update id="decrementParticipantCount" parameterType="java.lang.Integer">
+        UPDATE activities 
+        SET current_participants = GREATEST(current_participants - 1, 0)
+        WHERE activity_id = #{activityId}
+    </update>
+
+    <!-- 检查活动是否还有名额 -->
+    <select id="checkCapacity" parameterType="java.lang.Integer" resultType="java.lang.Boolean">
+        SELECT CASE 
+            WHEN max_participants = 0 THEN true  -- 不限制人数
+            WHEN current_participants &lt; max_participants THEN true  -- 还有名额
+            ELSE false  -- 已满
+        END as has_capacity
+        FROM activities 
+        WHERE activity_id = #{activityId}
+    </select>
+
+    <!-- 同步参与人数（根据实际报名记录） -->
+    <update id="syncParticipantCount" parameterType="java.lang.Integer">
+        UPDATE activities a
+        SET current_participants = (
+            SELECT COUNT(*) 
+            FROM activityregistrations ar 
+            WHERE ar.activity_id = a.activity_id 
+            AND ar.check_in_status = 'registered'
+        )
+        WHERE activity_id = #{activityId}
+    </update>
+
+    <!-- 批量同步所有活动的参与人数 -->
+    <update id="syncAllParticipantCounts">
+        UPDATE activities a
+        SET current_participants = (
+            SELECT COUNT(*) 
+            FROM activityregistrations ar 
+            WHERE ar.activity_id = a.activity_id 
+            AND ar.check_in_status = 'registered'
+        )
+    </update>
+
+    <!-- 检查并自动关闭已满的报名（暂时禁用，保持活动状态为open） -->
+    <update id="autoCloseFullActivities">
+        <!-- 暂时不自动关闭活动，保持open状态 -->
+        SELECT 1
+    </update>
+
+    <!-- 设置已过期但未签到的报名为缺席状态 -->
+    <update id="setAbsentForExpiredActivities">
+        UPDATE activityregistrations ar
+        INNER JOIN activities a ON ar.activity_id = a.activity_id
+        SET ar.check_in_status = 'absent'
+        WHERE ar.check_in_status = 'registered'
+        AND a.end_time &lt; NOW()
+        AND a.act_status IN ('completed', 'cancelled')
+    </update>
+
+    <!-- 更新过期的活动状态为completed -->
+    <update id="updateExpiredActivitiesToCompleted">
+        UPDATE activities 
+        SET act_status = 'completed'
+        WHERE end_time &lt; NOW()
+        AND act_status NOT IN ('completed', 'cancelled')
+    </update>
+
+    <!-- 更新已开始的活动状态为ongoing -->
+    <update id="updateStartedActivitiesToOngoing">
+        UPDATE activities 
+        SET act_status = 'ongoing'
+        WHERE start_time &lt;= NOW()
+        AND end_time &gt; NOW()
+        AND act_status = 'open'
+    </update>
+
+
+</mapper>

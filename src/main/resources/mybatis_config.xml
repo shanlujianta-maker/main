@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!-- configuration 配置-->
+<configuration>
+    <!--加载DB连接属性文件-->
+    <properties resource="db.properties"></properties>
+    <!--设置打印日志-->
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+        <!--关闭一级缓存 localCacheScope-->
+        <setting name="localCacheScope" value="STATEMENT"/>
+        <!--开启二级缓存-->
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+    <!--设置别名-->
+    <typeAliases>
+        <!--<typeAlias alias="Star" type="com.oracle.mybatis.pojo.Star"></typeAlias>-->
+        <package name="com.xja.club.pojo"/>
+    </typeAliases>
+    <!--增加分页插件 pageHelper-->
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor"></plugin>
+    </plugins>
+    <!--数据库环境配置-->
+    <environments default="development">
+        <environment id="development">
+            <!--事务管理器-->
+            <transactionManager type="JDBC"/>
+            <!--数据源-->
+            <dataSource type="POOLED">
+                <!--驱动，路径，用户名，密码-->
+                <property name="driver" value="${mysql.driverClassName}"/>
+                <property name="url" value="${mysql.url}"/>
+                <property name="username" value="${mysql.username}"/>
+                <property name="password" value="${mysql.password}"/>
+            </dataSource>
+        </environment>
+
+    </environments>
+    <!--配置映射文件-->
+<!--    <mappers>-->
+<!--        <package name="com.xja.club.mapper"/>-->
+<!--    </mappers>-->
+</configuration>

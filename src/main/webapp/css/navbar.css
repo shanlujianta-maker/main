@@ -1,0 +1,49 @@
+/* 导航栏通用样式 */
+.nav-link {
+    @apply relative overflow-hidden transition-all duration-300 hover:text-primary;
+}
+
+.nav-link::after {
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 content-[''];
+}
+
+.nav-link:hover::after {
+    @apply w-full;
+}
+
+/* 下拉菜单样式 */
+.group:hover .group-hover\:opacity-100 {
+    opacity: 1;
+}
+
+.group:hover .group-hover\:visible {
+    visibility: visible;
+}
+
+/* 移动端下拉菜单动画 */
+.mobile-dropdown-content {
+    transition: all 0.3s ease-in-out;
+}
+
+.mobile-dropdown-btn i {
+    transition: transform 0.2s ease-in-out;
+}
+
+.mobile-dropdown-btn i.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* 按钮样式 */
+.btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200;
+}
+
+/* 当前页面高亮样式 */
+.nav-current {
+    @apply text-primary font-medium;
+}
+
+/* 下拉菜单项高亮样式 */
+.dropdown-current {
+    @apply bg-primary/10 text-primary;
+}

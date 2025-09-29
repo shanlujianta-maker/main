@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--1.注解组件扫描-->
+    <context:component-scan base-package="com.xja.club.controller"/>
+    <!--2.开启注解驱动支持-->
+    <mvc:annotation-driven/>
+    <!--3.设置视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!--4.静态资源放行-->
+    <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/css/**" location="/css/"/>
+    <mvc:resources mapping="/img/**" location="/img/"/>
+    
+    <!--5.允许JSP文件直接访问-->
+    <mvc:default-servlet-handler/>
+
+
+    <!--静态资源放行第二种方式-->
+    <!--<mvc:default-servlet-handler/>-->
+    <!--静态资源放行第三种方式-->
+    <!--在web.xml文件 编写一个<servlet-mapping></servlet-mapping>-->
+    <!-- <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.js</url-pattern>
+        <url-pattern>*.png</url-pattern>
+        <url-pattern>*.jpg</url-pattern>
+        <url-pattern>*.css</url-pattern>
+    </servlet-mapping>-->
+
+
+<!--    &lt;!&ndash;5.配置多文件/部件文件上传解析器&ndash;&gt;-->
+<!--    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
+<!--        <property name="defaultEncoding" value="UTF-8"/>-->
+<!--        <property name="maxInMemorySize" value="543543434"/>-->
+<!--    </bean>-->
+
+</beans>

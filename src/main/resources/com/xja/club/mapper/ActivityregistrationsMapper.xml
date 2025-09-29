@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xja.club.mapper.ActivityregistrationsMapper">
+
+    <resultMap id="BaseResultMap" type="Activityregistrations">
+            <id property="registrationId" column="registration_id" />
+            <result property="userId" column="user_id" />
+            <result property="activityId" column="activity_id" />
+            <result property="registrationTime" column="registration_time" />
+            <result property="checkInStatus" column="check_in_status" />
+            <result property="checkInTime" column="check_in_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        registration_id,user_id,activity_id,registration_time,check_in_status,check_in_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from activityregistrations
+        where  registration_id = #{registrationId} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from activityregistrations
+        where  registration_id = #{registrationId} 
+    </delete>
+    <insert id="insert" keyColumn="registration_id" keyProperty="registrationId" parameterType="Activityregistrations" useGeneratedKeys="true">
+        insert into activityregistrations
+        ( registration_id,user_id,activity_id,registration_time,check_in_status,check_in_time)
+        values (#{registrationId},#{userId},#{activityId},#{registrationTime},#{checkInStatus},#{checkInTime})
+    </insert>
+    <insert id="insertSelective" keyColumn="registration_id" keyProperty="registrationId" parameterType="Activityregistrations" useGeneratedKeys="true">
+        insert into activityregistrations
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="registrationId != null">registration_id,</if>
+                <if test="userId != null">user_id,</if>
+                <if test="activityId != null">activity_id,</if>
+                <if test="registrationTime != null">registration_time,</if>
+                <if test="checkInStatus != null">check_in_status,</if>
+                <if test="checkInTime != null">check_in_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="registrationId != null">#{registrationId},</if>
+                <if test="userId != null">#{userId},</if>
+                <if test="activityId != null">#{activityId},</if>
+                <if test="registrationTime != null">#{registrationTime},</if>
+                <if test="checkInStatus != null">#{checkInStatus},</if>
+                <if test="checkInTime != null">#{checkInTime},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="Activityregistrations">
+        update activityregistrations
+        <set>
+                <if test="userId != null">
+                    user_id = #{userId},
+                </if>
+                <if test="activityId != null">
+                    activity_id = #{activityId},
+                </if>
+                <if test="registrationTime != null">
+                    registration_time = #{registrationTime},
+                </if>
+                <if test="checkInStatus != null">
+                    check_in_status = #{checkInStatus},
+                </if>
+                <if test="checkInTime != null">
+                    check_in_time = #{checkInTime},
+                </if>
+        </set>
+        where   registration_id = #{registrationId} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="Activityregistrations">
+        update activityregistrations
+        set 
+            user_id =  #{userId},
+            activity_id =  #{activityId},
+            registration_time =  #{registrationTime},
+            check_in_status =  #{checkInStatus},
+            check_in_time =  #{checkInTime}
+        where   registration_id = #{registrationId} 
+    </update>
+    <select id="selectByUserIdAndActivityId" parameterType="Activityregistrations" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from activityregistrations
+        where user_id = #{userId} and activity_id = #{activityId}
+    </select>
+
+    <!-- 统计活动报名人数 -->
+    <select id="countByActivityId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select count(*) from activityregistrations where activity_id = #{activityId}
+    </select>
+
+    <!-- 更新签到状态（通过用户ID和活动ID） -->
+    <update id="updateCheckInStatus">
+        update activityregistrations
+        set check_in_status = #{status},
+            check_in_time = #{checkInTime}
+        where user_id = #{userId} and activity_id = #{activityId}
+    </update>
+
+    <!-- 删除用户的活动报名记录 -->
+    <delete id="deleteByUserIdAndActivityId" parameterType="java.lang.Integer">
+        delete from activityregistrations
+        where user_id = #{param1} and activity_id = #{param2}
+    </delete>
+
+    <!-- 检查用户是否已报名某活动 -->
+    <select id="checkRegistrationExists" resultType="java.lang.Integer">
+        select count(*) from activityregistrations 
+        where user_id = #{userId} and activity_id = #{activityId}
+    </select>
+
+    <!-- 根据用户ID和活动ID删除报名记录 -->
+    <delete id="deleteByUserAndActivity">
+        delete from activityregistrations
+        where user_id = #{userId} and activity_id = #{activityId}
+    </delete>
+
+    <!-- 获取用户报名的活动列表（包含活动详情） -->
+    <select id="getMyActivitiesWithDetails" resultType="java.util.Map">
+        select 
+            ar.registration_id,
+            ar.user_id,
+            ar.activity_id,
+            ar.registration_time,
+            ar.check_in_status,
+            ar.check_in_time,
+            a.activity_name,
+            a.description,
+            a.start_time,
+            a.end_time,
+            a.location,
+            a.max_participants,
+            a.act_status,
+            c.club_name,
+            c.club_id
+        from activityregistrations ar
+        left join activities a on ar.activity_id = a.activity_id
+        left join clubs c on a.organizing_club_id = c.club_id
+        where ar.user_id = #{userId}
+        order by ar.registration_time desc
+    </select>
+
+    <!-- 根据报名记录ID更新签到状态 -->
+    <update id="updateCheckInStatusByRegistrationId">
+        update activityregistrations
+        set check_in_status = #{status},
+            check_in_time = #{checkInTime}
+        where registration_id = #{registrationId}
+    </update>
+
+    <!-- 根据用户ID和活动ID查询单个报名记录（不限制状态） -->
+    <select id="selectByUserAndActivity" resultMap="BaseResultMap">
+        select * from activityregistrations
+        where user_id = #{userId} and activity_id = #{activityId}
+        limit 1
+    </select>
+    
+    <!-- 根据用户ID和活动ID查询已报名记录（状态为registered） -->
+    <select id="selectRegisteredByUserAndActivity" resultMap="BaseResultMap">
+        select * from activityregistrations
+        where user_id = #{userId} and activity_id = #{activityId}
+        and check_in_status = 'registered'
+        limit 1
+    </select>
+</mapper>

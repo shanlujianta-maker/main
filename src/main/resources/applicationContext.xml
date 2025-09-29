@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ ========================================
+ 校园社团活动管理系统 - Spring配置文件
+ ========================================
+ 
+ 文件说明：
+ 1. Spring框架的核心配置文件
+ 2. 配置数据源、MyBatis、定时任务等
+ 3. 支持注解驱动的开发模式
+ 4. 集成数据库连接和事务管理
+ 
+ 主要配置：
+ - 组件扫描：自动发现和注册Bean
+ - 数据源配置：MySQL数据库连接
+ - MyBatis配置：ORM框架集成
+ - 定时任务：支持@Scheduled注解
+ - 属性文件：外部化配置
+ 
+ 创建时间：2025-01-01
+ 维护人员：系统管理员
+ ========================================
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <!-- ========================================
+         1. 组件扫描配置
+         ========================================
+         功能说明：
+         - 自动扫描指定包下的组件
+         - 自动注册@Service、@Component等注解的类
+         - 支持依赖注入和AOP
+         
+         扫描包说明：
+         - com.xja.club.service.impl: 服务层实现类
+         - com.xja.club.listener: 定时任务和监听器
+    -->
+    <context:component-scan base-package="com.xja.club.service.impl"/>
+    <context:component-scan base-package="com.xja.club.listener"/>
+    
+    <!-- ========================================
+         2. 属性文件配置
+         ========================================
+         功能说明：
+         - 引入外部属性文件
+         - 支持${}占位符引用
+         - 便于环境配置管理
+         
+         属性文件：db.properties
+         - 数据库连接配置
+         - 用户名密码等敏感信息
+    -->
+    <context:property-placeholder location="classpath:db.properties"/>
+    
+    <!-- ========================================
+         3. 数据源配置
+         ========================================
+         功能说明：
+         - 配置MySQL数据库连接
+         - 使用DriverManagerDataSource
+         - 支持连接池管理
+         
+         配置说明：
+         - driverClassName: MySQL驱动类
+         - url: 数据库连接URL
+         - username: 数据库用户名
+         - password: 数据库密码
+    -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${mysql.driverClassName}"></property>
+        <property name="url" value="${mysql.url}"></property>
+        <property name="username" value="${mysql.username}"></property>
+        <property name="password" value="${mysql.password}"></property>
+    </bean>
+    
+    <!-- ========================================
+         4. MyBatis配置
+         ========================================
+         功能说明：
+         - 配置SqlSessionFactory
+         - 集成MyBatis ORM框架
+         - 支持XML映射文件
+         
+         配置说明：
+         - dataSource: 数据源引用
+         - typeAliasesPackage: 实体类包路径
+         - mapperLocations: Mapper XML文件位置
+         - configLocation: MyBatis配置文件
+    -->
+    <bean id="factory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="com.xja.club.pojo"/>
+        <property name="mapperLocations" value="classpath:com/xja/club/mapper/*.xml"/>
+        <property name="configLocation" value="classpath:mybatis_config.xml"/>
+    </bean>
+    
+    <!-- ========================================
+         5. Mapper扫描配置
+         ========================================
+         功能说明：
+         - 自动扫描Mapper接口
+         - 自动创建Mapper代理对象
+         - 支持@Mapper注解
+         
+         配置说明：
+         - sqlSessionFactoryBeanName: SqlSessionFactory引用
+         - basePackage: Mapper接口包路径
+    -->
+    <bean id="mapper" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="factory"/>
+        <property name="basePackage" value="com.xja.club.mapper"/>
+    </bean>
+
+    <!-- ========================================
+         6. 定时任务配置
+         ========================================
+         功能说明：
+         - 启用Spring的定时任务功能
+         - 支持@Scheduled注解
+         - 自动管理任务调度
+         
+         使用说明：
+         - 在类上使用@Component注解
+         - 在方法上使用@Scheduled注解
+         - 支持cron表达式和固定频率
+    -->
+    <task:annotation-driven/>
+
+</beans>

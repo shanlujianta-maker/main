@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xja.club.mapper.ClubMemberMapper">
+    
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.xja.club.pojo.ClubMember">
+        <id column="membership_id" jdbcType="INTEGER" property="membershipId"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="club_id" jdbcType="INTEGER" property="clubId"/>
+        <result column="role_in_club" jdbcType="VARCHAR" property="roleInClub"/>
+        <result column="join_date" jdbcType="TIMESTAMP" property="joinDate"/>
+        <result column="application_reason" jdbcType="VARCHAR" property="applicationReason"/>
+        <result column="member_status" jdbcType="VARCHAR" property="memberStatus"/>
+    </resultMap>
+
+    <!-- 详细结果映射（包含关联信息） -->
+    <resultMap id="DetailedResultMap" type="com.xja.club.pojo.ClubMember" extends="BaseResultMap">
+        <result column="real_name" jdbcType="VARCHAR" property="realName"/>
+        <result column="user_phone" jdbcType="VARCHAR" property="userPhone"/>
+        <result column="user_type" jdbcType="VARCHAR" property="userType"/>
+        <result column="club_name" jdbcType="VARCHAR" property="clubName"/>
+    </resultMap>
+
+    <!-- 基础字段 -->
+    <sql id="Base_Column_List">
+        membership_id, user_id, club_id, role_in_club, join_date, application_reason, member_status
+    </sql>
+
+    <!-- 详细字段（包含关联字段） -->
+    <sql id="Detailed_Column_List">
+        cm.membership_id, cm.user_id, cm.club_id, cm.role_in_club, cm.join_date, 
+        cm.application_reason, cm.member_status,
+        u.real_name, u.user_phone, u.user_type,
+        c.club_name
+    </sql>
+
+    <!-- 根据主键删除 -->
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from clubmember
+        where membership_id = #{membershipId,jdbcType=INTEGER}
+    </delete>
+
+    <!-- 插入记录 -->
+    <insert id="insert" parameterType="com.xja.club.pojo.ClubMember">
+        insert into clubmember (membership_id, user_id, club_id, 
+                               role_in_club, join_date, application_reason, 
+                               member_status)
+        values (#{membershipId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{clubId,jdbcType=INTEGER}, 
+                #{roleInClub,jdbcType=VARCHAR}, #{joinDate,jdbcType=TIMESTAMP}, #{applicationReason,jdbcType=VARCHAR}, 
+                #{memberStatus,jdbcType=VARCHAR})
+    </insert>
+
+    <!-- 选择性插入记录 -->
+    <insert id="insertSelective" parameterType="com.xja.club.pojo.ClubMember">
+        insert into clubmember
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="membershipId != null">
+                membership_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="clubId != null">
+                club_id,
+            </if>
+            <if test="roleInClub != null">
+                role_in_club,
+            </if>
+            <if test="joinDate != null">
+                join_date,
+            </if>
+            <if test="applicationReason != null">
+                application_reason,
+            </if>
+            <if test="memberStatus != null">
+                member_status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="membershipId != null">
+                #{membershipId,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="clubId != null">
+                #{clubId,jdbcType=INTEGER},
+            </if>
+            <if test="roleInClub != null">
+                #{roleInClub,jdbcType=VARCHAR},
+            </if>
+            <if test="joinDate != null">
+                #{joinDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="applicationReason != null">
+                #{applicationReason,jdbcType=VARCHAR},
+            </if>
+            <if test="memberStatus != null">
+                #{memberStatus,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 根据主键查询 -->
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select 
+        <include refid="Base_Column_List"/>
+        from clubmember
+        where membership_id = #{membershipId,jdbcType=INTEGER}
+    </select>
+
+    <!-- 选择性更新记录 -->
+    <update id="updateByPrimaryKeySelective" parameterType="com.xja.club.pojo.ClubMember">
+        update clubmember
+        <set>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="clubId != null">
+                club_id = #{clubId,jdbcType=INTEGER},
+            </if>
+            <if test="roleInClub != null">
+                role_in_club = #{roleInClub,jdbcType=VARCHAR},
+            </if>
+            <if test="joinDate != null">
+                join_date = #{joinDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="applicationReason != null">
+                application_reason = #{applicationReason,jdbcType=VARCHAR},
+            </if>
+            <if test="memberStatus != null">
+                member_status = #{memberStatus,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where membership_id = #{membershipId,jdbcType=INTEGER}
+    </update>
+
+    <!-- 根据主键更新记录 -->
+    <update id="updateByPrimaryKey" parameterType="com.xja.club.pojo.ClubMember">
+        update clubmember
+        set user_id = #{userId,jdbcType=INTEGER},
+            club_id = #{clubId,jdbcType=INTEGER},
+            role_in_club = #{roleInClub,jdbcType=VARCHAR},
+            join_date = #{joinDate,jdbcType=TIMESTAMP},
+            application_reason = #{applicationReason,jdbcType=VARCHAR},
+            member_status = #{memberStatus,jdbcType=VARCHAR}
+        where membership_id = #{membershipId,jdbcType=INTEGER}
+    </update>
+
+    <!-- 查询所有成员（带关联信息） -->
+    <select id="selectAllWithDetails" resultMap="DetailedResultMap">
+        select 
+        membership_id, user_id, club_id, role_in_club, join_date, 
+        member_status,
+        real_name, user_phone, user_type, club_name
+        from v_club_member_detail
+        order by join_date desc
+    </select>
+
+    <!-- 根据社团ID查询成员 -->
+    <select id="selectByClubId" parameterType="java.lang.Integer" resultMap="DetailedResultMap">
+        select 
+        membership_id, user_id, club_id, role_in_club, join_date, 
+        member_status,
+        real_name, user_phone, user_type, club_name
+        from v_club_member_detail
+        where club_id = #{clubId,jdbcType=INTEGER}
+        order by join_date desc
+    </select>
+
+    <!-- 根据用户ID查询成员 -->
+    <select id="selectByUserId" parameterType="java.lang.Integer" resultMap="DetailedResultMap">
+        select 
+        membership_id, user_id, club_id, role_in_club, join_date, 
+        member_status,
+        real_name, user_phone, user_type, club_name
+        from v_club_member_detail
+        where user_id = #{userId,jdbcType=INTEGER}
+        order by join_date desc
+    </select>
+
+    <!-- 检查用户是否已加入社团 -->
+    <select id="selectByUserAndClub" resultMap="BaseResultMap">
+        select 
+        <include refid="Base_Column_List"/>
+        from clubmember
+        where user_id = #{userId,jdbcType=INTEGER}
+        and club_id = #{clubId,jdbcType=INTEGER}
+    </select>
+
+    <!-- 更新成员状态 -->
+    <update id="updateMemberStatus">
+        update clubmember
+        set member_status = #{memberStatus,jdbcType=VARCHAR}
+        where membership_id = #{membershipId,jdbcType=INTEGER}
+    </update>
+
+    <!-- 根据主键查询成员（用于权限检查） -->
+    <select id="getMemberById" resultMap="BaseResultMap">
+        select 
+        <include refid="Base_Column_List"/>
+        from clubmember
+        where membership_id = #{membershipId,jdbcType=INTEGER}
+    </select>
+
+    <!-- 获取用户社团信息 -->
+    <select id="getUserClubInfo" resultMap="BaseResultMap">
+        select 
+        <include refid="Base_Column_List"/>
+        from clubmember
+        where user_id = #{userId,jdbcType=INTEGER}
+        limit 1
+    </select>
+
+</mapper>
